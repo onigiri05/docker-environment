@@ -6,10 +6,10 @@
 COMMAND=$1
 shift # Remove the first argument (command), keep the rest for the while loop
 
-IMAGE_NAME="hw-env"
-CONT_NAME="hw-cont"
+IMAGE_NAME="aoc2026-env"
+CONT_NAME="aoc2026-cont"
 USER_NAME="$(id -un)"
-HOSTNAME="hw-env-host"
+HOSTNAME="aoc2026-env"
 MOUNTS=() # Use an array to handle multiple mount parameters safely
 
 # ==============================================================================

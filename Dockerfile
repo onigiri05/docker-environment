@@ -95,6 +95,10 @@ ENV SYSTEMC_HOME=/opt/systemc
 # 將 Verilator 執行檔加入 PATH
 ENV PATH=/opt/verilator/bin:$PATH
 
+# eman script
+COPY ./scripts/eman.sh /usr/local/bin/eman
+RUN chmod +x /usr/local/bin/eman
+
 # 切換為 Non-root 使用者運行
 USER $USERNAME
 WORKDIR /home/$USERNAME
