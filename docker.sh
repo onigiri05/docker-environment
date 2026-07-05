@@ -54,8 +54,11 @@ build_image() {
     else
         echo "Building Image '$IMAGE_NAME'..."
         # Assuming Dockerfile is in the current directory
-        docker build --build-arg USERNAME="$USER_NAME" -t "$IMAGE_NAME" .
-        echo "Image built successfully."
+        if docker build --build-arg USERNAME="$USER_NAME" -t "$IMAGE_NAME" .; then
+            echo "Image built successfully."
+        else
+            echo "Fail to build up image."
+        fi
     fi
 }
 

@@ -14,7 +14,9 @@ Available commands:
 
   eman c-compiler-version        : print the version of default C compiler and the version of GNU Make
   eman c-compiler-example        : compile and run the C/C++ example(s)
-
+  
+  eman systemc-example           : compile and run the SystemC example(s)
+  
   eman verilator-version         : print the version of the first found Verilator
   eman verilator-example         : compile and run the Verilator example(s)
 
@@ -71,6 +73,26 @@ CEOF
     # Compile and run
     cd "$TMPDIR"
     gcc -Wall -Wextra -O2 -o main main.c
+    ./main
+}
+
+systemc_example() {
+    echo "[SystemC Example]"
+    local TMPDIR=$(mktemp -d)
+    trap "rm -rf $TMPDIR" EXIT
+    
+    # Create main.c
+    cat > "$TMPDIR/main.cpp" << 'SYSCEOF'
+#include <systemc>
+int sc_main(int argc, char* argv[]) { return 0; }
+SYSCEOF
+
+    # Compile and run
+    cd "$TMPDIR"
+    g++ -std=c++17 main.cpp -o main -I. -I${SYSTEMC_HOME}/include \
+        -L${SYSTEMC_HOME}/lib-linux64 \
+        -Wl,-rpath,${SYSTEMC_HOME}/lib-linux64 \
+        -lsystemc -lm
     ./main
 }
 
@@ -186,9 +208,11 @@ check_all() {
     echo ""
     (python_version) || FAILED=true
     echo ""
-    echo "=== Compilation Check - C & Verilator ==="
+    echo "=== Compilation Check - C , SystemC, Verilator ==="
     echo ""
     (c_compiler_example) || FAILED=true
+    echo ""
+    (systemc_example) || FAILED=true
     echo ""
     (verilator_example) || FAILED=true
     echo ""
@@ -211,6 +235,9 @@ case "$1" in
         ;;
     c-compiler-example)
         c_compiler_example
+        ;;
+    systemc-example)
+        systemc_example
         ;;
     verilator-version)
         check_verilator

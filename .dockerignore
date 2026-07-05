@@ -1,0 +1,14 @@
+README.md
+
+# 在Host執行, 不需要包進 Image
+docker.sh
+.git/
+.gitignore
+
+# 衍生檔案s
+.vscode/
+.DS_Store
+*.swp
+Thumbs.db
+__pycache__/
+*.log

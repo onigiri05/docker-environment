@@ -12,7 +12,7 @@ ENV TZ=Asia/Taipei
 RUN apt-get update && apt-get install -y tzdata \
     && ln -fs /usr/share/zoneinfo/$TZ /etc/localtime \
     && dpkg-reconfigure -f noninteractive tzdata \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 建立固定的 UID/GID 與 Non-root 帳號 (避免掛載 Volume 時權限錯亂)
 ARG USERNAME=myuser
@@ -31,16 +31,17 @@ FROM base AS common_pkg_provider
 
 # 安裝 Core CLI Tools 與 Python/編譯環境
 RUN apt-get update && apt-get install -y \
-    vim git curl wget ca-certificates \
+    vim git curl wget ca-certificates tree \
     build-essential \
     python3 python3-pip \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 建立 python 指向 python3 的 symlink
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
-# 處理 PEP 668 問題：在 Container 中直接加上 --break-system-packages 旗標
-RUN pip install --break-system-packages pytest setuptools wheel
+# Ubuntu 24.04處理 PEP 668 問題：在 Container 中直接加上 --break-system-packages 旗標
+RUN pip install --break-system-packages --no-cache-dir \
+    pytest setuptools wheel
 
 # ==============================================================================
 # Stage 3: verilator_provider (Requirement 3 - Build from Source)
@@ -49,7 +50,7 @@ FROM common_pkg_provider AS verilator_provider
 
 # 安裝 Verilator 需要的額外編譯相依套件
 RUN apt-get update && apt-get install -y flex bison autoconf help2man perl \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp/verilator-build
 # 從官方 GitHub 下載並編譯，將成品安裝至獨立目錄 /opt/verilator
@@ -65,22 +66,20 @@ RUN git clone https://github.com/verilator/verilator . \
 # ==============================================================================
 FROM common_pkg_provider AS systemc_provider
 
-# 透過 TARGETARCH 變數捕捉 Docker buildx 傳入的 CPU 架構資訊 (amd64 / arm64)
-ARG TARGETARCH
-
 WORKDIR /tmp/systemc-build
 # 下載 Accellera SystemC 3.0.2
 RUN wget https://github.com/accellera-official/systemc/archive/refs/tags/3.0.2.tar.gz \
     && tar -xzf 3.0.2.tar.gz
 
 WORKDIR /tmp/systemc-build/systemc-3.0.2/objdir
+
 # 設定 CXXFLAGS 將標準設為 C++17，並將 SystemC 安裝至獨立目錄 /opt/systemc
 RUN ../configure --prefix=/opt/systemc CXXFLAGS="-std=c++17" \
     && make -j$(nproc) \
     && make install
 
 # ==============================================================================
-# Stage 5: release (最終成品)
+# Stage 5: release
 # ==============================================================================
 # 繼承 common_pkg_provider，這樣就能直接擁有 apt/pip 裝好的所有工具！
 FROM common_pkg_provider AS release
