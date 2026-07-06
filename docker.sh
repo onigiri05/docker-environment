@@ -19,7 +19,28 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --mount)
             # Convert input mount path to Docker's -v format
-            MOUNTS+=("-v" "$2")
+            INPUT_PATH="$2"
+            
+            # split
+            HOST_PART="${INPUT_PATH%%:*}"
+            CONT_PART="${INPUT_PATH#*:}"
+
+            # ==========================================
+            # 如果 Host 端資料夾不存在，腳本先幫忙建起來
+            # 建立的資料夾權限會是當前使用者，而不是 root
+            # ==========================================
+            if [ ! -e "$HOST_PART" ]; then
+                echo "Host mount target doesn't exist, building ...: $HOST_PART"
+                mkdir -p "$HOST_PART"
+            fi
+
+            # 判斷使用者有沒有輸入冒號 (也就是有沒有指定 Container 路徑)
+            if [[ "$INPUT_PATH" == *":"* ]]; then
+                MOUNTS+=("-v" "$HOST_PART:$CONT_PART")
+            else
+                MOUNTS+=("-v" "$HOST_PART:/home/$USERNAME/mnt")
+            fi
+            
             shift 2
             ;;
         --image-name)
@@ -54,7 +75,10 @@ build_image() {
     else
         echo "Building Image '$IMAGE_NAME'..."
         # Assuming Dockerfile is in the current directory
-        if docker build --build-arg USERNAME="$USER_NAME" -t "$IMAGE_NAME" .; then
+        if docker build --build-arg USERNAME="$USER_NAME" \
+                    --build-arg UID="$(id -u)" \
+                    --build-arg GID="$(id -g)" \
+                    -t "$IMAGE_NAME" .; then
             echo "Image built successfully."
         else
             echo "Fail to build up image."

@@ -12,3 +12,4 @@ docker.sh
 Thumbs.db
 __pycache__/
 *.log
+mount_test/
