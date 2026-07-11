@@ -20,7 +20,9 @@ Available commands:
   eman verilator-version         : print the version of the first found Verilator
   eman verilator-example         : compile and run the Verilator example(s)
   
-  eman uv-ersion                 : print uv, uvx version
+  eman uv-version                 : print uv, uvx version
+
+  eman gdb-version                 : print gdb version
   
   eman python-version            : print Python version
 
@@ -184,6 +186,15 @@ CPPEOF
     ./obj_dir/VCounter
 }
 
+gdb_version(){
+    echo "[gdb Version]"
+    if ! command -v gdb >/dev/null 2>&1; then
+        echo "gdb not found!"
+        exit 1
+    fi
+    gdb --version
+}
+
 uv_version() {
     echo "[uv Version]"
     if ! command -v uv >/dev/null 2>&1; then
@@ -223,6 +234,8 @@ check_all() {
     (c_compiler_version) || FAILED=true
     echo ""
     (check_verilator) || FAILED=true
+    echo ""
+    (gdb_version) || FAILED=true
     echo ""
     (uv_version) || FAILED=true
     echo ""
@@ -264,6 +277,9 @@ case "$1" in
         ;;
     verilator-example)
         verilator_example
+        ;;
+    gdb-version)
+        gdb_version
         ;;
     uv-version)
         uv_version

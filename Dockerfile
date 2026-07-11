@@ -33,6 +33,7 @@ FROM base AS common_pkg_provider
 RUN apt-get update && apt-get install -y \
     vim git curl wget ca-certificates tree \
     build-essential \
+    gdb \
     python3 python3-pip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
