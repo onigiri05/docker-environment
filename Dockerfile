@@ -43,6 +43,11 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN pip install --break-system-packages --no-cache-dir \
     pytest setuptools wheel
 
+# Install uv then move to usr/local/bin
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    mv ~/.local/bin/uv /usr/local/bin/uv && \
+    mv ~/.local/bin/uvx /usr/local/bin/uvx
+
 # ==============================================================================
 # Stage 3: verilator_provider (Requirement 3 - Build from Source)
 # ==============================================================================
@@ -97,6 +102,11 @@ ENV PATH=/opt/verilator/bin:$PATH
 # eman script
 COPY ./scripts/eman.sh /usr/local/bin/eman
 RUN chmod +x /usr/local/bin/eman
+
+# Automatically start ssh-agent and add the ssh-key upon bash login
+RUN echo 'eval "$(ssh-agent -s)" > /dev/null' >> /home/$USERNAME/.bashrc && \
+    echo 'ssh-add ~/.ssh/gitlab_key 2>/dev/null' >> /home/$USERNAME/.bashrc && \
+    echo 'ssh-add ~/.ssh/github_key 2>/dev/null' >> /home/$USERNAME/.bashrc
 
 # 切換為 Non-root 使用者運行
 USER $USERNAME

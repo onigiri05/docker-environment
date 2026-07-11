@@ -38,7 +38,7 @@ while [[ $# -gt 0 ]]; do
             if [[ "$INPUT_PATH" == *":"* ]]; then
                 MOUNTS+=("-v" "$HOST_PART:$CONT_PART")
             else
-                MOUNTS+=("-v" "$HOST_PART:/home/$USERNAME/mnt")
+                MOUNTS+=("-v" "$HOST_PART:/home/$USER_NAME/mnt")
             fi
             
             shift 2
@@ -118,6 +118,7 @@ run_container() {
             --hostname "$HOSTNAME" \
             -e HOST_USER="$USER_NAME" \
             "${MOUNTS[@]}" \
+            -v "$HOME/.ssh:/home/$USER_NAME/.ssh:ro" \
             "$IMAGE_NAME" \
             bash
             

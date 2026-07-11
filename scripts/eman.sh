@@ -19,7 +19,9 @@ Available commands:
   
   eman verilator-version         : print the version of the first found Verilator
   eman verilator-example         : compile and run the Verilator example(s)
-
+  
+  eman uv-ersion                 : print uv, uvx version
+  
   eman python-version            : print Python version
 
   eman check-all                 : check all tools and packages versions
@@ -182,6 +184,22 @@ CPPEOF
     ./obj_dir/VCounter
 }
 
+uv_version() {
+    echo "[uv Version]"
+    if ! command -v uv >/dev/null 2>&1; then
+        echo "uv not found!"
+        exit 1
+    fi
+    uv --version
+
+    echo "[uvx Version]"
+    if ! command -v uvx >/dev/null 2>&1; then
+        echo "uvx not found!"
+        exit 1
+    fi
+    uvx --version
+}
+
 python_version() {
     echo "[Python Version]"
     if ! command -v python3 >/dev/null 2>&1; then
@@ -205,6 +223,8 @@ check_all() {
     (c_compiler_version) || FAILED=true
     echo ""
     (check_verilator) || FAILED=true
+    echo ""
+    (uv_version) || FAILED=true
     echo ""
     (python_version) || FAILED=true
     echo ""
@@ -244,6 +264,9 @@ case "$1" in
         ;;
     verilator-example)
         verilator_example
+        ;;
+    uv-version)
+        uv_version
         ;;
     python-version)
         python_version
