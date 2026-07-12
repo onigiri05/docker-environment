@@ -114,6 +114,7 @@ run_container() {
         # Use -d (detach) to keep it running in the background, 
         # and -it to keep tty open so bash doesn't exit immediately.
         docker run -it -d \
+            --shm-size=8g \
             --name "$CONT_NAME" \
             --hostname "$HOSTNAME" \
             -e HOST_USER="$USER_NAME" \
