@@ -105,7 +105,14 @@ COPY ./scripts/eman.sh /usr/local/bin/eman
 RUN chmod +x /usr/local/bin/eman
 
 # Automatically start ssh-agent and add the ssh-key upon bash login
-RUN echo 'eval "$(ssh-agent -s)" > /dev/null' >> /home/$USERNAME/.bashrc && \
+RUN echo 'if [ -d "/tmp/host_ssh" ]; then' >> /home/$USERNAME/.bashrc && \
+    echo '    mkdir -p $HOME/.ssh' >> /home/$USERNAME/.bashrc && \
+    echo '    cp -a /tmp/host_ssh/. $HOME/.ssh/ 2>/dev/null' >> /home/$USERNAME/.bashrc && \
+    echo '    find $HOME/.ssh -type d -exec chmod 700 {} + 2>/dev/null' >> /home/$USERNAME/.bashrc && \
+    echo '    find $HOME/.ssh -type f -exec chmod 600 {} + 2>/dev/null' >> /home/$USERNAME/.bashrc && \
+    echo 'fi' >> /home/$USERNAME/.bashrc && \
+    echo 'eval "$(ssh-agent -s)" > /dev/null' >> /home/$USERNAME/.bashrc && \
+    echo "ssh-add ~/.ssh/$SSH_KEY 2>/dev/null" >> /home/$USERNAME/.bashrc && \
     echo 'ssh-add ~/.ssh/gitlab_key 2>/dev/null' >> /home/$USERNAME/.bashrc && \
     echo 'ssh-add ~/.ssh/github_key 2>/dev/null' >> /home/$USERNAME/.bashrc
 
