@@ -119,7 +119,7 @@ run_container() {
             --hostname "$HOSTNAME" \
             -e HOST_USER="$USER_NAME" \
             "${MOUNTS[@]}" \
-            -v "$HOME/.ssh:/home/$USER_NAME/.ssh:ro" \
+            -v "$HOME/.ssh:/tmp/host_ssh:ro" \
             "$IMAGE_NAME" \
             bash
             
